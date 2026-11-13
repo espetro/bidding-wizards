@@ -1,6 +1,6 @@
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
-import { Estimator } from "./pages/Estimator";
-import { Landing } from "./pages/Landing";
+import { Estimator } from "./features/bid-sheet";
+import { Landing } from "./features/landing";
 
 export default function App() {
   return (

@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
-import { hashUrlForPath } from "./lib/hashRoute";
+import { hashUrlForPath } from "./shared/hashRoute";
 import "./styles.css";
 
 const promoted = hashUrlForPath(location.pathname, location.search, location.hash);

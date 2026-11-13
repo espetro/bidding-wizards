@@ -1,0 +1,56 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "unicorn", "import"],
+  "categories": { "correctness": "error" },
+  "rules": {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "error",
+    "no-unused-expressions": "error",
+    "unicorn/no-useless-spread": "error",
+    "react/refs": "off"
+  },
+  "ignorePatterns": ["dist", "public", "pitch"],
+  "overrides": [
+    {
+      "files": ["src/features/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["../*/*", "!../../domain/*", "!../../shared/*"],
+                "message": "Import another slice through its index (../<slice>), not its internals. See docs/architecture.md."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/domain/**", "src/shared/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["../features", "../features/*", "../../features/*", "react", "react-dom"],
+                "message": "domain/ and shared/ are the shared kernel: pure TS, no React, no feature imports."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/App.tsx", "src/main.tsx"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          { "patterns": [{ "group": ["./features/*/*"], "message": "Import a slice through its index." }] }
+        ]
+      }
+    }
+  ]
+}

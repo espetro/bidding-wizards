@@ -1,6 +1,6 @@
 /// <reference types="node" />
 import { processDocuments } from "../server/jevDecide";
-import type { DocumentsRequest } from "../src/lib/documentDecision";
+import type { DocumentsRequest } from "../src/features/documents/documentDecision";
 
 const MAX_BYTES = 100_000;
 

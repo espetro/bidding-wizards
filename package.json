@@ -10,6 +10,8 @@
     "deck": "marp pitch/slides.md -o dist/pitch.html --html --no-stdin",
     "preview": "vite preview",
     "test": "vitest run",
+    "lint": "oxlint",
+    "check": "pnpm run typecheck && oxlint && vitest run",
     "typecheck": "tsc -b --pretty false && tsc -p tsconfig.node.json --pretty false"
   },
   "dependencies": {
@@ -29,6 +31,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.1.0",
+    "oxlint": "1.93.0",
     "tailwindcss": "^4.1.16",
     "typescript": "^5.9.3",
     "vite": "^7.1.12",

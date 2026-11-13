@@ -9,7 +9,7 @@ import {
   type DocumentsRequest,
   type DocumentsResult,
   type JevDocumentAnswers,
-} from "../src/lib/documentDecision";
+} from "../src/features/documents/documentDecision";
 
 const NOTES_CAP = 12_000;
 

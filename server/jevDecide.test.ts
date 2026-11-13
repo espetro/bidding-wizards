@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SAMPLE_ELECTRICAL_BLUEPRINT } from "../src/lib/blueprintMock";
+import { SAMPLE_ELECTRICAL_BLUEPRINT } from "../src/features/documents/blueprintMock";
 import { processDocuments, typeSafeApiKey } from "./jevDecide";
 
 describe("processDocuments", () => {
