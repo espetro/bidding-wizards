@@ -1,0 +1,18 @@
+# BidBench AI proxy (Cloudflare Worker).
+#
+# The TypeSafe key lives in the Worker secret, never in the page:
+#   wrangler secret put TYPESAFE_API_KEY
+#
+# Deploy from this directory:
+#   wrangler deploy
+
+name = "bidding-wizards-ai"
+main = "index.js"
+compatibility_date = "2026-11-12"
+
+[observability]
+enabled = true
+
+# Restrict who can call the proxy. "*" allows any origin.
+[vars]
+ALLOWED_ORIGINS = "*"
