@@ -22,7 +22,7 @@ Paste a job in plain words — or drop a PDF blueprint — and get an itemized c
 
 ## AI where it reads. Code where it counts.
 
-Buyers type jobs in their own words, so an on-device n-gram/catalog matcher itemizes the brief — instant, no API key, non-trade briefs qualified out instead of hallucinated. Blueprint PDFs are classified by TypeSafe **Jev** (`@ai-sdk/typesafe-ai`, model `jev-latest`) on `POST /api/documents` using `TYPESAFE_API_KEY` — drawings vs job forms, with occupied/hidden conditions bumping contingency. GitHub Pages has no API, so the same heuristic runs in the browser. Jev never invents quantities — line counts stay canned until a parser ships server-side.
+Buyers type jobs in their own words, so an on-device n-gram/catalog matcher itemizes the brief — instant, no API key, non-trade briefs qualified out instead of hallucinated. Blueprint PDFs are classified by TypeSafe **Jev** (`@ai-sdk/typesafe-ai`, model `jev-latest`) on `POST /api/documents` using `TYPESAFE_API_KEY` — drawings vs job forms, with occupied/hidden conditions bumping contingency. GitHub Pages has no API, so the same heuristic runs in the browser. Jev never invents quantities — the upload flow reads quantities from the PDF text layer in the browser (scans without text need pasting).
 
 Every dollar figure is plain arithmetic you can check by hand:
 

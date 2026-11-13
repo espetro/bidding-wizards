@@ -218,7 +218,7 @@ export function Estimator() {
       setReading(false);
       setStatus({
         kind: "ok",
-        text: `${takeoff.title}: ${takeoff.matched.join(", ")}. ${takeoff.mock ? "Heuristic counts" : "Jev-routed counts"} — edit any line before you send the bid.`,
+        text: `${takeoff.title}: ${takeoff.matched.join(", ")}. ${takeoff.mock ? "Sample counts" : "Counts read from your PDF"} — edit any line before you send the bid.`,
       });
     }, 280);
   }

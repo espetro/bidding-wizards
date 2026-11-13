@@ -1,6 +1,9 @@
 import { useRef, useState } from "react";
 import { SAMPLE_ELECTRICAL_BLUEPRINT, type BlueprintFileMeta, type BlueprintTakeoff } from "../lib/blueprintMock";
 import { processDocumentsClient } from "../lib/processDocumentClient";
+import { extractPdfText } from "../lib/pdfText";
+import { takeoffFromPdfText } from "../lib/pdfTakeoff";
+import { isPdfBlueprint } from "../lib/blueprintMock";
 
 type Props = {
   busy: boolean;
@@ -35,10 +38,27 @@ export function BlueprintUpload({ busy, onTakeoff }: Props) {
     onTakeoff(result.takeoff);
   }
 
+  async function readFile(file: File) {
+    if (!isPdfBlueprint(asMeta(file))) return run(asMeta(file));
+    try {
+      const { text, pages } = await extractPdfText(file);
+      const result = takeoffFromPdfText(text, pages, file.name);
+      if (!result.ok) {
+        setStatus({ kind: "err", text: result.message });
+        return;
+      }
+      setFileLabel(`${file.name} · ${pages} sheet${pages === 1 ? "" : "s"} (read from PDF)`);
+      setStatus({ kind: "idle" });
+      onTakeoff(result);
+    } catch {
+      setStatus({ kind: "err", text: "Could not read that PDF. Paste the scope under Read this job." });
+    }
+  }
+
   function pickFile(file: File | undefined) {
     if (!file) return;
     setFileLabel(file.name);
-    void run(asMeta(file));
+    void readFile(file);
   }
 
   return (
@@ -52,8 +72,8 @@ export function BlueprintUpload({ busy, onTakeoff }: Props) {
             </span>
           </div>
           <p className="mt-1 max-w-xl text-sm text-neutral-500">
-            Drop a PDF. TypeSafe Jev classifies the set (electrical vs architectural vs form); line counts stay canned
-            until a parser lives on the server. GitHub Pages falls back to the same heuristic without a key.
+            Drop a PDF. Quantities are read from the drawing's own text (schedules, legends, notes) and priced from the
+            catalog. Scanned drawings with no text layer need the scope pasted instead. The sample button stays canned.
           </p>
         </div>
         <button
@@ -104,7 +124,7 @@ export function BlueprintUpload({ busy, onTakeoff }: Props) {
           }}
         />
         <p className="text-sm font-semibold text-neutral-800">Upload PDF blueprint</p>
-        <p className="mt-1 text-xs text-neutral-400">PDF only. Filename and size go to Jev when the API is up; the file stays local on Pages.</p>
+        <p className="mt-1 text-xs text-neutral-400">PDF only. Read in your browser; the file never leaves your device.</p>
         {fileLabel ? <p className="mt-2 text-xs font-medium text-neutral-600">{fileLabel}</p> : null}
       </div>
 
