@@ -1,5 +1,7 @@
-import type { LaborLine, MaterialLine } from "../../domain/estimate";
-import type { JobInfo } from "../../domain/job";
+import { DEFAULT_CONTINGENCY, DEFAULT_MARGIN_FLOOR, DEFAULT_MARKUP, DEFAULT_OVERRUN } from "../../domain/catalog";
+import { emptyAreaForUnit, emptyLabor, type LaborLine, type MaterialLine } from "../../domain/estimate";
+import { emptyJob, type JobInfo } from "../../domain/job";
+import type { Market } from "../../domain/markets";
 
 export type Draft = {
   job: JobInfo;
@@ -12,6 +14,46 @@ export type Draft = {
   targetMargin: number;
   overrunPct: number;
 };
+
+/** A blank bid for the market: one empty area line, default pricing, the market's tax rate. */
+export function freshDraft(market: Market): Draft {
+  return {
+    job: emptyJob(),
+    notes: "",
+    materials: [emptyAreaForUnit(market.areaUnit)],
+    labor: [emptyLabor()],
+    markupPct: DEFAULT_MARKUP,
+    contingencyPct: DEFAULT_CONTINGENCY,
+    gstPct: market.taxPct,
+    targetMargin: DEFAULT_MARGIN_FLOOR,
+    overrunPct: DEFAULT_OVERRUN,
+  };
+}
+
+/**
+ * The draft the sheet opens with. A sample link ignores the saved job (zero markup and
+ * contingency until the sample brief is read) but keeps the estimator's margin settings.
+ * A saved draft is restored, never with empty tables.
+ */
+export function initialDraft(saved: Draft | null, market: Market, sample: boolean): Draft {
+  const blankArea = () => emptyAreaForUnit(market.areaUnit);
+  if (sample) {
+    return {
+      ...freshDraft(market),
+      notes: market.sampleBrief,
+      markupPct: 0,
+      contingencyPct: 0,
+      targetMargin: saved?.targetMargin ?? DEFAULT_MARGIN_FLOOR,
+      overrunPct: saved?.overrunPct ?? DEFAULT_OVERRUN,
+    };
+  }
+  if (!saved) return freshDraft(market);
+  return {
+    ...saved,
+    materials: saved.materials.length ? saved.materials : [blankArea()],
+    labor: saved.labor.length ? saved.labor : [emptyLabor()],
+  };
+}
 
 export const DRAFT_KEY = "bidding-wizards.draft.v1";
 
@@ -45,8 +87,8 @@ export function loadDraft(store: Store | null = defaultStore()): Draft | null {
       markupPct: num(d.markupPct, 0),
       contingencyPct: num(d.contingencyPct, 0),
       gstPct: num(d.gstPct, 0),
-      targetMargin: num(d.targetMargin, 15),
-      overrunPct: num(d.overrunPct, 10),
+      targetMargin: num(d.targetMargin, DEFAULT_MARGIN_FLOOR),
+      overrunPct: num(d.overrunPct, DEFAULT_OVERRUN),
     };
   } catch {
     return null;

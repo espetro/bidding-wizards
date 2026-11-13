@@ -303,3 +303,7 @@ export const CATALOG: CatalogEntry[] = [
 
 export const DEFAULT_MARKUP = 22;
 export const DEFAULT_CONTINGENCY = 8;
+/** Margin floor % the margin guard warns below. */
+export const DEFAULT_MARGIN_FLOOR = 15;
+/** Overrun % the stress test applies to direct cost. */
+export const DEFAULT_OVERRUN = 10;

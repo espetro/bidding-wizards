@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { DRAFT_KEY, clearDraft, loadDraft, saveDraft, type Draft } from "./draft";
-import { emptyLabor, emptyMaterial } from "../../domain/estimate";
+import { DRAFT_KEY, clearDraft, freshDraft, initialDraft, loadDraft, saveDraft, type Draft } from "./draft";
+import { emptyLabor, emptyMaterial, isAreaPricedLine } from "../../domain/estimate";
+import { MARKETS } from "../../domain/markets";
 
 function memoryStore(initial: Record<string, string> = {}) {
   const m = new Map(Object.entries(initial));
@@ -47,5 +48,39 @@ describe("draft persistence", () => {
   it("survives a missing store", () => {
     expect(loadDraft(null)).toBeNull();
     expect(() => saveDraft(draft(), null)).not.toThrow();
+  });
+});
+
+describe("initial draft", () => {
+  const nz = MARKETS.nz;
+
+  it("opens a fresh bid with the market's tax and an area line in its unit", () => {
+    const d = initialDraft(null, nz, false);
+    expect(d.gstPct).toBe(nz.taxPct);
+    expect(d.materials).toHaveLength(1);
+    expect(isAreaPricedLine(d.materials[0]!)).toBe(true);
+    expect(d.labor).toHaveLength(1);
+  });
+
+  it("restores a saved draft and never with empty tables", () => {
+    const saved = { ...draft(), materials: [], labor: [] };
+    const d = initialDraft(saved, nz, false);
+    expect(d.notes).toBe("tile");
+    expect(d.markupPct).toBe(20);
+    expect(d.materials).toHaveLength(1);
+    expect(d.labor).toHaveLength(1);
+  });
+
+  it("a sample link drops the saved job but keeps the margin settings", () => {
+    const saved = { ...draft(), targetMargin: 30, overrunPct: 25 };
+    const d = initialDraft(saved, nz, true);
+    expect(d.notes).toBe(nz.sampleBrief);
+    expect(d.job.name).toBe("");
+    expect([d.markupPct, d.contingencyPct]).toEqual([0, 0]);
+    expect([d.targetMargin, d.overrunPct]).toEqual([30, 25]);
+  });
+
+  it("freshDraft uses the market tax", () => {
+    expect(freshDraft(MARKETS.us).gstPct).toBe(MARKETS.us.taxPct);
   });
 });
