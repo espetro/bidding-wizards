@@ -295,3 +295,5 @@ export const CATALOG: CatalogEntry[] = [
 
 export const DEFAULT_MARKUP = 22;
 export const DEFAULT_CONTINGENCY = 8;
+/** Australian GST on the GST-exclusive bid. */
+export const DEFAULT_GST = 10;

@@ -10,6 +10,7 @@ function input(partial: Partial<EstimateInput> = {}): EstimateInput {
     labor: [{ id: "l1", role: "Tile setter", hours: 8, rate: 75 }],
     contingencyPct: 8,
     markupPct: 22,
+    gstPct: 10,
     ...partial,
   };
 }
@@ -24,8 +25,36 @@ describe("breakdown", () => {
     expect(b.costToComplete).toBe(1068.12);
     expect(b.markup).toBe(234.99); // 1068.12 * 0.22 rounded
     expect(b.bidTotal).toBe(1303.11);
+    expect(b.gst).toBe(130.31); // 10% of exclusive bid
+    expect(b.gstInclusive).toBe(1433.42);
+    expect(b.totalIncGst).toBe(1433.42);
     expect(b.profit).toBe(b.markup);
     expect(b.marginPct).toBe(18.03); // 234.99 / 1303.11 * 100
+  });
+
+  it("shows GST as a separate line and GST-inclusive as bid + GST", () => {
+    const b = breakdown({
+      materials: [{ kind: "qty", id: "m", item: "X", quantity: 100, unit: "ea", unitCost: 1 }],
+      labor: [],
+      contingencyPct: 0,
+      markupPct: 0,
+      gstPct: 10,
+    });
+    expect(b.bidTotal).toBe(100);
+    expect(b.gst).toBe(10);
+    expect(b.gstInclusive).toBe(110);
+  });
+
+  it("treats omitted gstPct as 10% GST on the exclusive bid", () => {
+    const b = breakdown({
+      materials: [{ kind: "qty", id: "m", item: "X", quantity: 50, unit: "ea", unitCost: 2 }],
+      labor: [],
+      contingencyPct: 0,
+      markupPct: 0,
+    });
+    expect(b.bidTotal).toBe(100);
+    expect(b.gst).toBe(10);
+    expect(b.gstInclusive).toBe(110);
   });
 
   it("treats markup as profit and margin as profit / bid", () => {
@@ -40,6 +69,8 @@ describe("breakdown", () => {
     expect(b.contingency).toBe(0);
     expect(b.markup).toBe(25);
     expect(b.bidTotal).toBe(125);
+    expect(b.gst).toBe(12.5);
+    expect(b.gstInclusive).toBe(137.5);
     expect(b.profit).toBe(25);
     expect(b.marginPct).toBe(20);
   });
@@ -53,12 +84,15 @@ describe("breakdown", () => {
       labor: [{ id: "l", role: "x", hours: 2, rate: Number.POSITIVE_INFINITY }],
       contingencyPct: -5,
       markupPct: Number.NaN,
+      gstPct: -10,
     });
     expect(b.materials).toBe(0);
     expect(b.labor).toBe(0);
     expect(b.contingency).toBe(0);
     expect(b.markup).toBe(0);
     expect(b.bidTotal).toBe(0);
+    expect(b.gst).toBe(0);
+    expect(b.gstInclusive).toBe(0);
     expect(b.marginPct).toBe(0);
   });
 
@@ -87,6 +121,8 @@ describe("breakdown", () => {
     expect(b.costToComplete).toBe(1346.4);
     expect(b.markup).toBe(269.28);
     expect(b.bidTotal).toBe(1615.68);
+    expect(b.gst).toBe(161.57);
+    expect(b.gstInclusive).toBe(1777.25);
     expect(b.profit).toBe(269.28);
     expect(b.marginPct).toBe(16.67);
   });
@@ -118,6 +154,8 @@ describe("sqFtArea / sqFtAmount", () => {
     });
     expect(bid.materials).toBe(1680);
     expect(bid.bidTotal).toBe(1680);
+    expect(bid.gst).toBe(168);
+    expect(bid.gstInclusive).toBe(1848);
     expect(sqFtAmount({ kind: "sqft", id: "s", item: "room", length: 12, width: 14, pricePerSqFt: 4.25 })).toBe(714);
     expect(sqFtArea({ length: 800, width: 1 })).toBe(800);
     expect(sqFtAmount({ kind: "sqft", id: "s", item: "floor", length: 800, width: 1, pricePerSqFt: 7.8 })).toBe(6240);
