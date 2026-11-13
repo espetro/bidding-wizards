@@ -1,0 +1,23 @@
+# BidBench: crawl policy. Public marketing pages are open to everyone.
+User-agent: *
+Allow: /
+Disallow: /api/
+Content-Signal: ai-train=no, search=yes, ai-input=yes
+
+# AI search and assistant retrieval: allowed, so BidBench can appear in answers.
+User-agent: OAI-SearchBot
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: ChatGPT-User
+User-agent: Claude-User
+Allow: /
+Disallow: /api/
+
+# AI training crawlers: not allowed.
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+User-agent: CCBot
+Disallow: /
+
+Sitemap: https://bidding-wizards.vercel.app/sitemap.xml

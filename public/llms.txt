@@ -1,0 +1,24 @@
+# BidBench (Bidding Wizards)
+
+> Free contractor bid estimator. Paste a job in plain words or drop a PDF blueprint and get an itemized bid: materials, labor, contingency, markup, GST, and the profit and margin the contractor keeps. No sign-in, no API key, no card. Markets: New Zealand, Australia, United States.
+
+BidBench is a single-page app (hash routing: `/#/bid`). Bid math is plain arithmetic: direct = materials + labor; contingency = direct x contingency%; bid = (direct + contingency) x (1 + markup%); margin = profit / bid. AI is used only to read blueprint PDFs and classify documents; it never invents quantities.
+
+## Product
+
+- [Landing page](https://bidding-wizards.vercel.app/): what it does and who it is for
+- [Estimator](https://bidding-wizards.vercel.app/bid): the bid tool
+- [NZ sample bid](https://bidding-wizards.vercel.app/bid?loc=nz&sample=1): NZ re-roof, metres, GST 15%
+- [AU sample bid](https://bidding-wizards.vercel.app/bid?loc=au&sample=1): composite deck, GST 10%
+- [US sample bid](https://bidding-wizards.vercel.app/bid?loc=us&sample=1): bath remodel, square feet
+- [Pitch deck](https://bidding-wizards.vercel.app/pitch.html): traction and team
+
+## Docs
+
+- [Full context for LLMs](https://bidding-wizards.vercel.app/llms-full.txt): methodology, markets, exports, API, URL parameters
+- [Source code](https://github.com/espetro/bidding-wizards): README and implementation
+
+## Optional
+
+- [Sitemap](https://bidding-wizards.vercel.app/sitemap.xml)
+- [Benchmark page](https://bidding-wizards.vercel.app/bidbench.html)
