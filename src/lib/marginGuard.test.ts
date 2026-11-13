@@ -25,9 +25,18 @@ describe("GST", () => {
     expect(b.totalIncGst).toBe(1452);
     expect(b.marginPct).toBe(16.67);
   });
-  it("defaults to no GST when unset", () => {
+  it("defaults to 10% GST when unset; 0% is exempt", () => {
     const b = breakdown({ materials: [], labor: [{ ...emptyLabor(), hours: 1, rate: 50 }], contingencyPct: 0, markupPct: 0 });
-    expect(b.gst).toBe(0);
-    expect(b.totalIncGst).toBe(50);
+    expect(b.gst).toBe(5);
+    expect(b.totalIncGst).toBe(55);
+    const exempt = breakdown({
+      materials: [],
+      labor: [{ ...emptyLabor(), hours: 1, rate: 50 }],
+      contingencyPct: 0,
+      markupPct: 0,
+      gstPct: 0,
+    });
+    expect(exempt.gst).toBe(0);
+    expect(exempt.totalIncGst).toBe(50);
   });
 });
