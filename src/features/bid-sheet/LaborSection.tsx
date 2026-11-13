@@ -1,30 +1,42 @@
 import { laborTotal } from "../../domain/estimate";
 import { parseNumber } from "../../shared/money";
-import { fieldClass, narrowFieldClass } from "./fields";
-import type { BidSheet } from "./useBidSheet";
+import { fieldClass, narrowFieldClass, tinyFieldClass } from "./fields";
+import { crewFields, type BidSheet } from "./useBidSheet";
 
+const CREW_KEYS = [
+  ["crew", "Crew"],
+  ["days", "Days"],
+  ["hoursPerDay", "Hrs/day"],
+] as const;
+
+/** Crew lines: people × days × hours/day = hours, then × rate. */
 export function LaborSection({ sheet }: { sheet: BidSheet }) {
-  const rows = sheet.laborRows;
+  const { t, market, laborRows: rows } = sheet;
   return (
     <section className="print-break rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-sm sm:p-5">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-bold">Labor</h2>
+        <h2 className="text-sm font-bold">{t("Labor")}</h2>
         <button
           type="button"
           className="no-print text-xs font-semibold text-neutral-700 hover:text-black"
           onClick={rows.add}
         >
-          + Add crew
+          {t("+ Add crew")}
         </button>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[560px] text-left text-sm">
+        <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="text-[11px] uppercase tracking-wide text-neutral-400">
             <tr>
-              <th className="pb-2 font-semibold">Role</th>
-              <th className="pb-2 font-semibold">Hours</th>
-              <th className="pb-2 font-semibold">Rate</th>
-              <th className="pb-2 text-right font-semibold">Line</th>
+              <th className="pb-2 font-semibold">{t("Role")}</th>
+              {CREW_KEYS.map(([key, label]) => (
+                <th key={key} className="pb-2 font-semibold">
+                  {t(label)}
+                </th>
+              ))}
+              <th className="pb-2 font-semibold">{t("Hours")}</th>
+              <th className="pb-2 font-semibold">{t("Rate")}</th>
+              <th className="pb-2 text-right font-semibold">{t("Line")}</th>
               <th className="no-print w-10 pb-2" />
             </tr>
           </thead>
@@ -36,19 +48,23 @@ export function LaborSection({ sheet }: { sheet: BidSheet }) {
                     value={row.role}
                     onChange={(e) => rows.update(i, { role: e.target.value })}
                     className={fieldClass}
-                    placeholder="Role"
+                    placeholder={t("Role")}
                   />
                 </td>
-                <td className="py-1.5 pr-2">
-                  <input
-                    type="number"
-                    min={0}
-                    step="any"
-                    value={row.hours}
-                    onChange={(e) => rows.update(i, { hours: parseNumber(e.target.value) })}
-                    className={narrowFieldClass}
-                  />
-                </td>
+                {CREW_KEYS.map(([key, label]) => (
+                  <td key={key} className="py-1.5 pr-1">
+                    <input
+                      type="number"
+                      min={0}
+                      step="any"
+                      aria-label={t(label)}
+                      value={crewFields(row)[key]}
+                      onChange={(e) => rows.updateCrew(i, key, parseNumber(e.target.value))}
+                      className={tinyFieldClass}
+                    />
+                  </td>
+                ))}
+                <td className="py-1.5 pr-2 tabular-nums text-neutral-600">{row.hours.toLocaleString(market.locale)}</td>
                 <td className="py-1.5 pr-2">
                   <input
                     type="number"

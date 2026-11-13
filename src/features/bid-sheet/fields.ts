@@ -5,3 +5,5 @@ const inlineField =
 export const fieldClass = `w-full ${inlineField}`;
 /** Same, for short numeric cells (hours, rate). */
 export const narrowFieldClass = `w-24 ${inlineField}`;
+/** Same, for crew, days and hours/day. */
+export const tinyFieldClass = `w-16 ${inlineField}`;

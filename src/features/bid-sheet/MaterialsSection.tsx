@@ -11,16 +11,17 @@ import {
 import { labelsForAreaUnit } from "../../domain/markets";
 import { parseNumber } from "../../shared/money";
 import { fieldClass } from "./fields";
+import { useT } from "./i18n";
 import type { BidSheet } from "./useBidSheet";
 
 /** Qty lines and area-priced lines in one list. */
 export function MaterialsSection({ sheet }: { sheet: BidSheet }) {
-  const { draft, market, formatMoney, materialRows: rows } = sheet;
+  const { draft, market, formatMoney, t, materialRows: rows } = sheet;
   return (
     <section className="print-break rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-sm sm:p-5">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-sm font-bold">Materials</h2>
+          <h2 className="text-sm font-bold">{t("Materials")}</h2>
           <p className="text-[11px] text-neutral-400">
             Qty lines and area lines (L×W×{market.pricePerAreaLabel}) share this bid.
           </p>
@@ -31,14 +32,14 @@ export function MaterialsSection({ sheet }: { sheet: BidSheet }) {
             className="text-xs font-semibold text-neutral-700 hover:text-black"
             onClick={() => rows.add("qty")}
           >
-            + Add item
+            {t("+ Add item")}
           </button>
           <button
             type="button"
             className="text-xs font-semibold text-neutral-700 hover:text-black"
             onClick={() => rows.add("area")}
           >
-            + Add area
+            {t("+ Add area")}
           </button>
         </div>
       </div>
@@ -79,17 +80,18 @@ function QtyRow({
   onRemove: () => void;
   formatMoney: (n: number) => string;
 }) {
+  const t = useT();
   return (
     <div className="grid grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(4.5rem,0.5fr))_minmax(5rem,0.6fr)_auto] items-center gap-1 rounded-xl border border-neutral-100 px-2 py-1 text-sm">
       <input
         value={row.item}
         onChange={(e) => onChange({ ...row, item: e.target.value })}
         className={fieldClass}
-        placeholder="Item"
+        placeholder={t("Item")}
         aria-label="Material item"
       />
       <label className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">Qty</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t("Qty")}</span>
         <input
           type="number"
           min={0}
@@ -100,7 +102,7 @@ function QtyRow({
         />
       </label>
       <label className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">Unit</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t("Unit")}</span>
         <input
           value={row.unit}
           onChange={(e) => onChange({ ...row, unit: e.target.value })}
@@ -108,7 +110,7 @@ function QtyRow({
         />
       </label>
       <label className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">Unit cost</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t("Unit cost")}</span>
         <input
           type="number"
           min={0}
@@ -119,7 +121,7 @@ function QtyRow({
         />
       </label>
       <div className="text-right">
-        <div className="text-[10px] uppercase tracking-wide text-neutral-400">Line</div>
+        <div className="text-[10px] uppercase tracking-wide text-neutral-400">{t("Line")}</div>
         <div className="font-medium tabular-nums">{formatMoney(materialTotal(row))}</div>
       </div>
       <button
@@ -151,20 +153,21 @@ function AreaPricedRow({
   const labels = labelsForAreaUnit(unit, currency);
   const area = lineArea(row);
   const price = linePricePerArea(row);
+  const t = useT();
   return (
     <div className="grid grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(4.5rem,0.45fr))_minmax(5.5rem,0.55fr)_minmax(5.5rem,0.6fr)_auto] items-center gap-1 rounded-xl border border-amber-200/80 bg-amber-50/40 px-2 py-1 text-sm">
       <label className="flex min-w-0 flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-amber-800/70">{labels.item}</span>
+        <span className="text-[10px] uppercase tracking-wide text-amber-800/70">{t(labels.item)}</span>
         <input
           value={row.item}
           onChange={(e) => onChange({ ...row, item: e.target.value })}
           className={fieldClass}
           placeholder={unit === "m" ? "Re-roof / deck" : "Room / flooring"}
-          aria-label={labels.item}
+          aria-label={t(labels.item)}
         />
       </label>
       <label className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{labels.length}</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t(labels.length)}</span>
         <input
           type="number"
           min={0}
@@ -175,7 +178,7 @@ function AreaPricedRow({
         />
       </label>
       <label className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{labels.width}</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t(labels.width)}</span>
         <input
           type="number"
           min={0}
@@ -186,13 +189,13 @@ function AreaPricedRow({
         />
       </label>
       <div className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{labels.area}</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t(labels.area)}</span>
         <span className="px-2 py-1.5 tabular-nums text-neutral-800">
-          {area.toLocaleString()} {labels.areaSuffix}
+          {area.toLocaleString()} {t(labels.areaSuffix)}
         </span>
       </div>
       <label className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{labels.price}</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t(labels.price)}</span>
         <input
           type="number"
           min={0}
@@ -206,7 +209,7 @@ function AreaPricedRow({
         />
       </label>
       <div className="text-right">
-        <div className="text-[10px] uppercase tracking-wide text-neutral-400">{labels.amount}</div>
+        <div className="text-[10px] uppercase tracking-wide text-neutral-400">{t(labels.amount)}</div>
         <div className="font-medium tabular-nums">{formatMoney(materialTotal(row))}</div>
       </div>
       <button

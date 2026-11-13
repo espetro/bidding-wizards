@@ -7,11 +7,11 @@ const labelClass = "mb-1 block text-xs font-semibold uppercase tracking-wide tex
 
 /** Contingency, tax and markup percentages. */
 export function PricingInputs({ sheet }: { sheet: BidSheet }) {
-  const { draft, set, market } = sheet;
+  const { draft, set, market, t } = sheet;
   return (
     <section className="no-print grid gap-3 rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-sm sm:grid-cols-2 sm:p-5">
       <label className="text-sm">
-        <span className={labelClass}>Contingency % of direct</span>
+        <span className={labelClass}>{t("Contingency % of direct")}</span>
         <input
           type="number"
           min={0}
@@ -35,7 +35,7 @@ export function PricingInputs({ sheet }: { sheet: BidSheet }) {
         />
       </label>
       <label className="text-sm">
-        <span className={labelClass}>Markup % of cost-to-complete</span>
+        <span className={labelClass}>{t("Markup % of cost-to-complete")}</span>
         <input
           type="number"
           min={0}

@@ -19,5 +19,6 @@ describe("Estimator", () => {
   it("labels tax and area by the market in the URL", () => {
     expect(render("/bid?loc=nz")).toContain("Total inc GST");
     expect(render("/bid?loc=us")).toContain("Sample: ");
+    expect(render("/bid?loc=mx")).toContain("Mano de obra");
   });
 });

@@ -37,9 +37,24 @@ export type MaterialLine = QtyMaterialLine | AreaPricedLine;
 export type LaborLine = {
   id: string;
   role: string;
+  /** Total crew-hours. With crew/days/hoursPerDay set, it is always crew × days × hoursPerDay. */
   hours: number;
   rate: number;
+  crew?: number;
+  days?: number;
+  hoursPerDay?: number;
 };
+
+/** Crew-hours from people × days × hours per day (e.g. 4 techs × 3 days on the roof × 9 h = 108 h). */
+export function crewHours(crew: number, days: number, hoursPerDay: number): number {
+  const ok = (n: number) => (Number.isFinite(n) && n > 0 ? n : 0);
+  return roundCents(ok(crew) * ok(days) * ok(hoursPerDay));
+}
+
+/** A labor line priced by crew: hours come from crew × days × hours/day. */
+export function crewLabor(role: string, crew: number, days: number, hoursPerDay: number, rate: number): LaborLine {
+  return { id: newId(), role, crew, days, hoursPerDay, hours: crewHours(crew, days, hoursPerDay), rate };
+}
 
 export type EstimateInput = {
   materials: MaterialLine[];

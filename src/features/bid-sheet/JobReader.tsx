@@ -2,14 +2,14 @@ import type { BidSheet } from "./useBidSheet";
 
 /** Free-text job notes in, catalog-matched lines out. */
 export function JobReader({ sheet }: { sheet: BidSheet }) {
-  const { draft, status, reading } = sheet;
+  const { draft, status, reading, t } = sheet;
   return (
     <section className="no-print rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-lg font-black tracking-tight">Read this job</h1>
+          <h1 className="text-lg font-black tracking-tight">{t("Read this job")}</h1>
           <p className="mt-1 max-w-xl text-sm text-neutral-500">
-            Paste the work in your own words. The on-device catalog fills the sheet. You own the numbers after that.
+            {t("Paste the work in your own words. The on-device catalog fills the sheet. You own the numbers after that.")}
           </p>
         </div>
         <button
@@ -18,7 +18,7 @@ export function JobReader({ sheet }: { sheet: BidSheet }) {
           onClick={() => void sheet.readNotes(draft.notes)}
           className="rounded-xl bg-[#FACC15] px-4 py-2.5 text-sm font-bold text-neutral-950 shadow-sm hover:bg-[#EAB308] disabled:opacity-60"
         >
-          {reading ? "Reading…" : "Read this job"}
+          {reading ? t("Reading…") : t("Read this job")}
         </button>
       </div>
       <textarea

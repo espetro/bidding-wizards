@@ -17,6 +17,7 @@ describe("markets", () => {
     expect(detectMarket("Re-roof, 18 m x 12 m, NZ$85 per m²")).toBe("nz");
     expect(MARKETS.nz.taxPct).toBe(15);
     expect(MARKETS.nz.currency).toBe("NZD");
+    expect(money(85, "NZD", MARKETS.nz.locale)).toBe("NZ$85.00");
     expect(money(18360, "NZD", "en-NZ")).toMatch(/18,360/);
   });
 

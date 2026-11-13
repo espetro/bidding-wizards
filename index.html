@@ -13,10 +13,10 @@
       content="contractor bid, estimate software, bid estimator, construction estimate, takeoff, markup, contingency, margin, GST, quoting tool, trade contractor"
     />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://espetro.github.io/bidding-wizards/" />
+    <link rel="canonical" href="https://bidding-wizards.vercel.app/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Bidding Wizards" />
-    <meta property="og:url" content="https://espetro.github.io/bidding-wizards/" />
+    <meta property="og:url" content="https://bidding-wizards.vercel.app/" />
     <meta property="og:title" content="BidBench — know your margin before the bid leaves your hands" />
     <meta
       property="og:description"
@@ -35,7 +35,7 @@
         "name": "BidBench",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "Web",
-        "url": "https://espetro.github.io/bidding-wizards/",
+        "url": "https://bidding-wizards.vercel.app/",
         "description": "Itemized contractor bid and estimate software. Paste a job in plain words — get materials, labor, contingency, markup, GST and the margin you'll keep.",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
         "creator": { "@type": "Organization", "name": "Bidding Wizards" }
@@ -48,6 +48,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Bidding Wizards" />
+    <script>
+      (function () {
+        var path = location.pathname.replace(/\/+$/, "") || "/";
+        if (/\/bid$/.test(path) && location.hash.indexOf("#/") !== 0) {
+          location.replace(path.replace(/\/bid$/, "/") + "#/bid" + location.search);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

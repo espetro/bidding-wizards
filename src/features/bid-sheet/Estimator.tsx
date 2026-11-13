@@ -6,12 +6,14 @@ import { JobReader } from "./JobReader";
 import { LaborSection } from "./LaborSection";
 import { MaterialsSection } from "./MaterialsSection";
 import { PricingInputs } from "./PricingInputs";
+import { TContext } from "./i18n";
 import { useBidSheet } from "./useBidSheet";
 
 /** The /bid page: layout only. State and actions live in useBidSheet. */
 export function Estimator() {
   const sheet = useBidSheet();
   return (
+    <TContext.Provider value={sheet.t}>
     <div className="playful-root min-h-screen bg-[#FAFAFA] text-neutral-900">
       <BidToolbar sheet={sheet} />
 
@@ -32,10 +34,11 @@ export function Estimator() {
         <span className="no-print">
           {" · "}
           <a href="./bidbench.html" className="underline-offset-2 hover:underline">
-            Classic BidBench
+            {sheet.t("Classic BidBench")}
           </a>
         </span>
       </footer>
     </div>
+    </TContext.Provider>
   );
 }

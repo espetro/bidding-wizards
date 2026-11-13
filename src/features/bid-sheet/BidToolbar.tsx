@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MARKET_LIST, bidSearch } from "../../domain/markets";
-import { download, toProcoreBudgetCsv, toQuickBooksIif } from "../export";
+import { bidRows, download, toProcoreBudgetCsv, toQuickBooksIif, xlsxFromRows } from "../export";
 import type { BidSheet } from "./useBidSheet";
 
 const buttonClass =
   "rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 hover:bg-neutral-50";
 
 export function BidToolbar({ sheet }: { sheet: BidSheet }) {
-  const { input, market, marketId, wantSample } = sheet;
+  const { input, market, marketId, wantSample, t } = sheet;
+  const es = market.lang === "es";
   const [copied, setCopied] = useState(false);
 
   async function copyShareLink() {
@@ -45,23 +46,36 @@ export function BidToolbar({ sheet }: { sheet: BidSheet }) {
           ))}
         </div>
         <button type="button" onClick={sheet.newBid} className={buttonClass}>
-          New bid
+          {t("New bid")}
         </button>
         <button type="button" onClick={() => void sheet.copyBid()} className={buttonClass}>
-          Copy bid
+          {t("Copy bid")}
         </button>
         <button type="button" onClick={sheet.loadSample} className={buttonClass}>
           Sample: {market.sampleName}
         </button>
         <button type="button" onClick={() => void copyShareLink()} className={buttonClass}>
-          {copied ? "Link copied" : "Copy link"}
+          {copied ? t("Link copied") : t("Copy link")}
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            download(
+              `${(sheet.draft.job.name || (es ? "cotizacion" : "bid")).replace(/[^\w\- ]+/g, "")}.xlsx`,
+              xlsxFromRows(bidRows(input, market), es ? "Cotización" : "Bid"),
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+          }
+          className={buttonClass}
+        >
+          {t("Excel")}
         </button>
         <button
           type="button"
           onClick={() => download("procore-budget.csv", toProcoreBudgetCsv(input), "text/csv")}
           className={buttonClass}
         >
-          Procore budget
+          {t("Procore budget")}
         </button>
         <button
           type="button"
@@ -73,14 +87,14 @@ export function BidToolbar({ sheet }: { sheet: BidSheet }) {
           }
           className={buttonClass}
         >
-          QuickBooks
+          {t("QuickBooks")}
         </button>
         <button
           type="button"
           onClick={() => window.print()}
           className="rounded-lg bg-[#FACC15] px-3 py-2 text-xs font-bold text-neutral-950 hover:bg-[#EAB308]"
         >
-          Print bid
+          {t("Print bid")}
         </button>
       </div>
     </header>

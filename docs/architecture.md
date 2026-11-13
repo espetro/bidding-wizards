@@ -23,9 +23,9 @@ src/
   domain/                         shared kernel, pure TS, no React
     estimate.ts                   bid lines, breakdown math, margin helpers
     catalog.ts                    price book and pricing defaults
-    markets.ts                    NZ, AU, US: tax, currency, area unit, ?loc= parsing
+    markets.ts                    NZ, AU, US, MX: tax, currency, area unit, UI language, ?loc= parsing
     job.ts                        JobInfo
-  shared/                         tiny generic helpers (money, pct, parseNumber)
+  shared/                         tiny generic helpers (money, pct, parseNumber, hashRoute)
   features/<slice>/               one folder per user-facing capability, flat
     index.ts                      the slice's public API, the only thing other slices import
     *.test.ts                     tests sit next to the code
@@ -34,10 +34,10 @@ server/, api/                     Jev classification endpoint (Node)
 
 Slices today:
 
-- `bid-sheet`: the `/bid` page. `useBidSheet.ts` owns all state and actions, `useMarketFromUrl.ts` reads and writes `?loc=` and `?sample=`, `draft.ts` holds persistence, `freshDraft(market)` and `initialDraft`, and each section is one component (`BidToolbar`, `JobReader`, `MaterialsSection`, `LaborSection`, `PricingInputs`, `BidSummary`). `Estimator.tsx` is layout only.
+- `bid-sheet`: the `/bid` page. `useBidSheet.ts` owns all state and actions, `useMarketFromUrl.ts` reads and writes `?loc=` and `?sample=`, `draft.ts` holds persistence, `freshDraft(market)` and `initialDraft`, and each section is one component (`BidToolbar`, `JobReader`, `MaterialsSection`, `LaborSection`, `PricingInputs`, `BidSummary`). `Estimator.tsx` is layout only. `i18n.ts` holds the Spanish strings; sections read `sheet.t` and row components `useT()`.
 - `job-reader`: free-text notes to bid lines (`readJob`).
-- `documents`: blueprint upload, take-off and form classification. `server/` and `api/` import `documentDecision.ts` directly because the index pulls in React.
-- `export`: plain-text bid, Procore CSV, QuickBooks IIF.
+- `documents`: blueprint upload, PDF text take-off (`pdfText`, `pdfTakeoff`) and form classification. `server/` and `api/` import `documentDecision.ts` directly because the index pulls in React.
+- `export`: plain-text bid, Excel (`xlsx`), Procore CSV, QuickBooks IIF.
 - `landing`: the `/` page.
 
 ## Rules (oxlint enforces the first three)
