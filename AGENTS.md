@@ -4,9 +4,13 @@ The default branch is `main` (there is no `master`). The owner cannot approve PR
 
 ## Merge to `main` yourself when
 
-- Checks are green: `tsc -b`, `vitest run` and `vite build` pass locally, and any CI or Vercel checks on the PR pass.
+- Checks are green: `mise run check` (typecheck + oxlint + vitest, about 7s) and `pnpm run build` pass locally, and any CI or Vercel checks on the PR pass. CI runs the same `check` before deploying.
 - There are no conflicts with `origin/main`. Fetch first, and if `main` moved, merge it into your branch and resolve conflicts before merging.
 - The change is yours and finished. Do not merge half-done work.
+
+## Where code goes
+
+Feature folders under `src/features/<slice>/` with a public `index.ts`, pure shared code in `src/domain/` and `src/shared/`, tests colocated. Read `docs/architecture.md` for the layout, the import rules oxlint enforces and the "how to add a feature or fix" recipe.
 
 ## How
 
