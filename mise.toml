@@ -1,3 +1,7 @@
 [tools]
 node = "22"
 pnpm = "12.16.1"
+
+[tasks.check]
+description = "Fast gate before pushing (~7s): typecheck, lint (oxlint), unit tests (vitest)"
+run = "pnpm run check"
