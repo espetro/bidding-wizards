@@ -5,7 +5,7 @@ import {
   OUT_OF_SCOPE,
   RISK_PHRASES,
   type CatalogEntry,
-} from "./catalog";
+} from "../../domain/catalog";
 import {
   emptyArea,
   emptyLabor,
@@ -16,8 +16,8 @@ import {
   type AreaPricedLine,
   type LaborLine,
   type MaterialLine,
-} from "./estimate";
-import { detectMarket, MARKETS, SAMPLE_US_BATH, type AreaUnit, type MarketId } from "./markets";
+} from "../../domain/estimate";
+import { detectMarket, MARKETS, SAMPLE_US_BATH, type AreaUnit, type MarketId } from "../../domain/markets";
 
 export const SAMPLE_JOB = SAMPLE_US_BATH;
 

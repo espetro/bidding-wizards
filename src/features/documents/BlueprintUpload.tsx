@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
-import { SAMPLE_ELECTRICAL_BLUEPRINT, type BlueprintFileMeta, type BlueprintTakeoff } from "../lib/blueprintMock";
-import { processDocumentsClient } from "../lib/processDocumentClient";
+import { SAMPLE_ELECTRICAL_BLUEPRINT, type BlueprintFileMeta, type BlueprintTakeoff } from "./blueprintMock";
+import { processDocumentsClient } from "./processDocumentClient";
 
 type Props = {
   busy: boolean;

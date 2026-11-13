@@ -1,10 +1,5 @@
-import type { LaborLine, MaterialLine } from "./estimate";
-
-export type JobInfo = { name: string; address: string; date: string };
-
-export function emptyJob(): JobInfo {
-  return { name: "", address: "", date: new Date().toISOString().slice(0, 10) };
-}
+import type { LaborLine, MaterialLine } from "../../domain/estimate";
+import type { JobInfo } from "../../domain/job";
 
 export type Draft = {
   job: JobInfo;

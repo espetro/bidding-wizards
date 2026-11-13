@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { BlueprintUpload } from "../components/BlueprintUpload";
-import { JobDetails } from "../components/JobDetails";
-import { bidText } from "../lib/bidText";
-import { clearDraft, emptyJob, loadDraft, saveDraft, type JobInfo } from "../lib/draft";
-import { DEFAULT_CONTINGENCY, DEFAULT_MARKUP } from "../lib/catalog";
-import type { BlueprintTakeoff } from "../lib/blueprintMock";
+import { BlueprintUpload, applyFormHints, processDocumentsClient, type BlueprintTakeoff } from "../documents";
+import { JobDetails } from "./JobDetails";
+import { bidText, download, toProcoreBudgetCsv, toQuickBooksIif } from "../export";
+import { clearDraft, loadDraft, saveDraft } from "./draft";
+import { emptyJob, type JobInfo } from "../../domain/job";
+import { DEFAULT_CONTINGENCY, DEFAULT_MARKUP } from "../../domain/catalog";
 import {
   breakdown,
   emptyAreaForUnit,
@@ -24,8 +24,7 @@ import {
   type LaborLine,
   type MaterialLine,
   type QtyMaterialLine,
-} from "../lib/estimate";
-import { applyFormHints } from "../lib/documentDecision";
+} from "../../domain/estimate";
 import {
   bidSearch,
   inferMarket,
@@ -36,11 +35,9 @@ import {
   resolveMarket,
   sampleFromSearchParams,
   type MarketId,
-} from "../lib/markets";
-import { money, parseNumber, pct } from "../lib/money";
-import { processDocumentsClient } from "../lib/processDocumentClient";
-import { readJob } from "../lib/readJob";
-import { download, toProcoreBudgetCsv, toQuickBooksIif } from "../lib/exports";
+} from "../../domain/markets";
+import { money, parseNumber, pct } from "../../shared/money";
+import { readJob } from "../job-reader";
 
 type Status = { kind: "idle" } | { kind: "ok"; text: string } | { kind: "err"; text: string };
 

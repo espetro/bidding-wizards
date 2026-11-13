@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { money } from "./money";
+import { money } from "../shared/money";
 import {
   DEFAULT_MARKET_ID,
   bidHref,

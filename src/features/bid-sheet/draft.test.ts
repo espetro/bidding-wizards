@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DRAFT_KEY, clearDraft, loadDraft, saveDraft, type Draft } from "./draft";
-import { emptyLabor, emptyMaterial } from "./estimate";
+import { emptyLabor, emptyMaterial } from "../../domain/estimate";
 
 function memoryStore(initial: Record<string, string> = {}) {
   const m = new Map(Object.entries(initial));

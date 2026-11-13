@@ -1,4 +1,4 @@
-import type { JobInfo } from "../lib/draft";
+import type { JobInfo } from "../../domain/job";
 
 const inputClass =
   "w-full rounded-xl border border-neutral-200 bg-[#FAFAFA] px-3 py-2 text-sm focus:border-neutral-900 focus:outline-none";

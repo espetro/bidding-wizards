@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { emptyArea, emptyLabor, emptyMaterial } from "./estimate";
+import { emptyArea, emptyLabor, emptyMaterial } from "../../domain/estimate";
 import { toProcoreBudgetCsv, toQuickBooksIif } from "./exports";
 
 const input = {

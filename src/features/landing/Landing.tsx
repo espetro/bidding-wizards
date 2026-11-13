@@ -1,9 +1,9 @@
-import { HowItWorks } from "../components/landing/HowItWorks";
-import { MinimalFooter } from "../components/landing/MinimalFooter";
-import { PlayfulHero } from "../components/landing/PlayfulHero";
-import { Toast } from "../components/landing/Toast";
-import { useFitToViewport } from "../components/landing/useFitToViewport";
-import { bidHref } from "../lib/markets";
+import { HowItWorks } from "./HowItWorks";
+import { MinimalFooter } from "./MinimalFooter";
+import { PlayfulHero } from "./PlayfulHero";
+import { Toast } from "./Toast";
+import { useFitToViewport } from "./useFitToViewport";
+import { bidHref } from "../../domain/markets";
 import { useState } from "react";
 
 const COPY = {

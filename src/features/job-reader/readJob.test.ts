@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { isAreaLine, isAreaPricedLine, isSqFtLine } from "./estimate";
-import { SAMPLE_NZ_REROOF } from "./markets";
+import { isAreaLine, isAreaPricedLine, isSqFtLine } from "../../domain/estimate";
+import { SAMPLE_NZ_REROOF } from "../../domain/markets";
 import { SAMPLE_JOB, parseAreaPhrases, parseSqFtPhrases, readJob } from "./readJob";
 
 describe("readJob", () => {

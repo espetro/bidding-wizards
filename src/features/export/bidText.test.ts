@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { bidText } from "./bidText";
-import { emptySqFt, type EstimateInput } from "./estimate";
+import { emptySqFt, type EstimateInput } from "../../domain/estimate";
 
 const input: EstimateInput = {
   materials: [

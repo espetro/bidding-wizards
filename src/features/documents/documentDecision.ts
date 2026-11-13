@@ -8,7 +8,7 @@ import {
   type BlueprintTakeoff,
   type BlueprintTakeoffResult,
 } from "./blueprintMock";
-import { DEFAULT_CONTINGENCY } from "./catalog";
+import { DEFAULT_CONTINGENCY } from "../../domain/catalog";
 
 export const DOCUMENT_KIND = {
   electrical_plan: "electrical_plan",

@@ -1,4 +1,4 @@
-import type { JobInfo } from "./draft";
+import type { JobInfo } from "../../domain/job";
 import {
   breakdown,
   isAreaPricedLine,
@@ -8,9 +8,9 @@ import {
   linePricePerArea,
   materialTotal,
   type EstimateInput,
-} from "./estimate";
-import { labelsForAreaUnit, type Market } from "./markets";
-import { money, pct } from "./money";
+} from "../../domain/estimate";
+import { labelsForAreaUnit, type Market } from "../../domain/markets";
+import { money, pct } from "../../shared/money";
 
 /** Plain-text bid for pasting into an email or text message. Same math as the sheet. */
 export function bidText(job: JobInfo, input: EstimateInput, loc: Market | boolean = false): string {

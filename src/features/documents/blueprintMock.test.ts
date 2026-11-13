@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { breakdown, isAreaPricedLine, isSqFtLine } from "./estimate";
+import { breakdown, isAreaPricedLine, isSqFtLine } from "../../domain/estimate";
 import {
   SAMPLE_ELECTRICAL_BLUEPRINT,
   isPdfBlueprint,
