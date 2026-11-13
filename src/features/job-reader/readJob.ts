@@ -346,7 +346,7 @@ function nearestPrice(prices: PriceSpan[], start: number, end: number, unit: Are
 
 function labelAround(text: string, start: number, end: number, fallback: string): string {
   const before = text.slice(Math.max(0, start - 48), start).replace(/[\s,.:;-]+$/g, "");
-  const beforeMatch = before.match(/([a-z][a-z0-9+\-]{1,24}(?:\s+[a-z][a-z0-9+\-]{1,24}){0,3})$/);
+  const beforeMatch = before.match(/([a-z][a-z0-9+-]{1,24}(?:\s+[a-z][a-z0-9+-]{1,24}){0,3})$/);
   const after = text.slice(end, end + 40).replace(/^[\s,.:;-]+/, "");
   const afterMatch = after.match(/^([a-z][a-z0-9+\-\s]{0,36}?)(?=\s+(?:\d|and|with|plus|nzd|aud|usd|,|;|\.|$)|$)/);
   const label = cleanLabel(beforeMatch?.[1] ?? afterMatch?.[1] ?? "");
@@ -626,7 +626,7 @@ export function readJob(raw: string): ReadJobResult {
     materials.every(isAreaPricedLine);
 
   if (!quotedAreaOnly) {
-    for (const mat of [...materials]) {
+    for (const mat of materials) {
       const cat = CATALOG.find((c) => c.name === mat.item);
       if (!cat) continue;
       const laborId = MATERIAL_TO_LABOR[cat.id];

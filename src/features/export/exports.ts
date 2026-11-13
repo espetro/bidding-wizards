@@ -60,9 +60,8 @@ export function toQuickBooksIif(input: EstimateInput, customer: string, date = n
     lines.push(`SPL\tESTIMATE\t${d}\tEstimates\t\t${n2(-qty * price * factor)}\t${-qty}\t${n2(price * factor)}\t${item.replace(/\t/g, " ")}\t`);
   for (const m of input.materials) {
     if (materialTotal(m) === 0) continue;
-    isAreaPricedLine(m)
-      ? spl(m.item || "Material", lineArea(m), linePricePerArea(m))
-      : spl(m.item || "Material", m.quantity, m.unitCost);
+    if (isAreaPricedLine(m)) spl(m.item || "Material", lineArea(m), linePricePerArea(m));
+    else spl(m.item || "Material", m.quantity, m.unitCost);
   }
   for (const l of input.labor) if (laborTotal(l) > 0) spl(l.role || "Labor", l.hours, l.rate);
   if (b.gst > 0) lines.push(`SPL\tESTIMATE\t${d}\tEstimates\t\t${n2(-b.gst)}\t-1\t${n2(b.gst)}\tGST\t`);
