@@ -8,6 +8,9 @@ import { DEFAULT_CONTINGENCY, DEFAULT_MARKUP } from "../lib/catalog";
 import type { BlueprintTakeoff } from "../lib/blueprintMock";
 import {
   breakdown,
+  crewHours,
+  crewLabor,
+  newId,
   emptyAreaForUnit,
   emptyLabor,
   emptyMaterial,
@@ -35,9 +38,12 @@ import {
   marketFromSearchParams,
   resolveMarket,
   sampleFromSearchParams,
+  sampleLinesFor,
   type MarketId,
 } from "../lib/markets";
 import { money, parseNumber, pct } from "../lib/money";
+import { TContext, tFor, useT } from "../lib/i18n";
+import { bidRows, xlsxFromRows } from "../lib/xlsx";
 import { processDocumentsClient } from "../lib/processDocumentClient";
 import { readJob } from "../lib/readJob";
 import { download, toProcoreBudgetCsv, toQuickBooksIif } from "../lib/exports";
@@ -73,6 +79,7 @@ export function Estimator() {
   const [copied, setCopied] = useState(false);
 
   const $ = (n: number) => money(n, market.currency, market.locale);
+  const t = tFor(market.lang);
 
   const totals = useMemo(
     () => breakdown({ materials, labor, markupPct, contingencyPct, gstPct }),
@@ -149,6 +156,16 @@ export function Estimator() {
     });
   }
 
+  /** MX sample: crew lines straight onto the sheet (the brief reader is English-only for now). */
+  function applySampleLines(id: MarketId): boolean {
+    const lines = sampleLinesFor(id);
+    if (!lines) return false;
+    setMaterials(lines.materials.map((m) => ({ ...m, id: newId() })) as MaterialLine[]);
+    setLabor(lines.labor.map((l) => crewLabor(l.role, l.crew, l.days, l.hoursPerDay, l.rate)));
+    setStatus({ kind: "ok", text: "Ejemplo cargado: mano de obra por cuadrilla (hombres × días × horas/día × tarifa). Edite cualquier renglón." });
+    return true;
+  }
+
   function loadSample() {
     const brief = MARKETS[marketId].sampleBrief;
     setNotes(brief);
@@ -158,7 +175,7 @@ export function Estimator() {
       next.set("sample", "1");
       return next;
     });
-    void applyRead(brief);
+    if (!applySampleLines(marketId)) void applyRead(brief);
   }
 
   useEffect(() => {
@@ -175,7 +192,7 @@ export function Estimator() {
     if (!wantSample) return;
     const brief = MARKETS[marketId].sampleBrief;
     setNotes(brief);
-    void applyRead(brief);
+    if (!applySampleLines(marketId)) void applyRead(brief);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [marketId, wantSample]);
 
@@ -207,6 +224,7 @@ export function Estimator() {
   }
 
   return (
+    <TContext.Provider value={t}>
     <div className="playful-root min-h-screen bg-[#FAFAFA] text-neutral-900">
       <header className="no-print flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200/70 px-4 py-3 sm:px-8">
         <Link to="/" className="flex items-center gap-2">
@@ -234,14 +252,14 @@ export function Estimator() {
             onClick={newBid}
             className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 hover:bg-neutral-50"
           >
-            New bid
+            {t("New bid")}
           </button>
           <button
             type="button"
             onClick={() => void copyBid()}
             className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 hover:bg-neutral-50"
           >
-            Copy bid
+            {t("Copy bid")}
           </button>
           <button
             type="button"
@@ -255,28 +273,41 @@ export function Estimator() {
             onClick={() => void copyShareLink()}
             className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 hover:bg-neutral-50"
           >
-            {copied ? "Link copied" : "Copy link"}
+            {copied ? t("Link copied") : t("Copy link")}
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              download(
+                `${(job.name || (market.lang === "es" ? "cotizacion" : "bid")).replace(/[^\w\- ]+/g, "")}.xlsx`,
+                xlsxFromRows(bidRows({ materials, labor, markupPct, contingencyPct, gstPct }, market), market.lang === "es" ? "Cotización" : "Bid"),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              )
+            }
+            className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 hover:bg-neutral-50"
+          >
+            {t("Excel")}
           </button>
           <button
             type="button"
             onClick={() => download("procore-budget.csv", toProcoreBudgetCsv({ materials, labor, markupPct, contingencyPct, gstPct }), "text/csv")}
             className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 hover:bg-neutral-50"
           >
-            Procore budget
+            {t("Procore budget")}
           </button>
           <button
             type="button"
             onClick={() => download("quickbooks-estimate.iif", toQuickBooksIif({ materials, labor, markupPct, contingencyPct, gstPct }, window.prompt("QuickBooks customer:job name", "Customer:Job") ?? ""))}
             className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs font-semibold text-neutral-800 hover:bg-neutral-50"
           >
-            QuickBooks
+            {t("QuickBooks")}
           </button>
           <button
             type="button"
             onClick={() => window.print()}
             className="rounded-lg bg-[#FACC15] px-3 py-2 text-xs font-bold text-neutral-950 hover:bg-[#EAB308]"
           >
-            Print bid
+            {t("Print bid")}
           </button>
         </div>
       </header>
@@ -287,9 +318,9 @@ export function Estimator() {
           <section className="no-print rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-sm sm:p-5">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h1 className="text-lg font-black tracking-tight">Read this job</h1>
+                <h1 className="text-lg font-black tracking-tight">{t("Read this job")}</h1>
                 <p className="mt-1 max-w-xl text-sm text-neutral-500">
-                  Paste the work in your own words. The on-device catalog fills the sheet. You own the numbers after that.
+                  {t("Paste the work in your own words. The on-device catalog fills the sheet. You own the numbers after that.")}
                 </p>
               </div>
               <button
@@ -298,7 +329,7 @@ export function Estimator() {
                 onClick={() => void applyRead(notes)}
                 className="rounded-xl bg-[#FACC15] px-4 py-2.5 text-sm font-bold text-neutral-950 shadow-sm hover:bg-[#EAB308] disabled:opacity-60"
               >
-                {reading ? "Reading…" : "Read this job"}
+                {reading ? t("Reading…") : t("Read this job")}
               </button>
             </div>
             <textarea
@@ -323,7 +354,7 @@ export function Estimator() {
           <section className="print-break rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-sm sm:p-5">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h2 className="text-sm font-bold">Materials</h2>
+                <h2 className="text-sm font-bold">{t("Materials")}</h2>
                 <p className="text-[11px] text-neutral-400">
                   Qty lines and area lines (L×W×{market.pricePerAreaLabel}) share this bid.
                 </p>
@@ -334,14 +365,14 @@ export function Estimator() {
                   className="text-xs font-semibold text-neutral-700 hover:text-black"
                   onClick={() => setMaterials((rows) => [...rows, emptyMaterial()])}
                 >
-                  + Add item
+                  {t("+ Add item")}
                 </button>
                 <button
                   type="button"
                   className="text-xs font-semibold text-neutral-700 hover:text-black"
                   onClick={() => setMaterials((rows) => [...rows, emptyAreaForUnit(market.areaUnit)])}
                 >
-                  + Add area
+                  {t("+ Add area")}
                 </button>
               </div>
             </div>
@@ -379,23 +410,26 @@ export function Estimator() {
 
           <section className="print-break rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-sm sm:p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-bold">Labor</h2>
+              <h2 className="text-sm font-bold">{t("Labor")}</h2>
               <button
                 type="button"
                 className="no-print text-xs font-semibold text-neutral-700 hover:text-black"
-                onClick={() => setLabor((rows) => [...rows, emptyLabor()])}
+                onClick={() => setLabor((rows) => [...rows, crewLabor("", 1, 1, 8, 0)])}
               >
-                + Add crew
+                {t("+ Add crew")}
               </button>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] text-left text-sm">
+              <table className="w-full min-w-[720px] text-left text-sm">
                 <thead className="text-[11px] uppercase tracking-wide text-neutral-400">
                   <tr>
-                    <th className="pb-2 font-semibold">Role</th>
-                    <th className="pb-2 font-semibold">Hours</th>
-                    <th className="pb-2 font-semibold">Rate</th>
-                    <th className="pb-2 text-right font-semibold">Line</th>
+                    <th className="pb-2 font-semibold">{t("Role")}</th>
+                    <th className="pb-2 font-semibold">{t("Crew")}</th>
+                    <th className="pb-2 font-semibold">{t("Days")}</th>
+                    <th className="pb-2 font-semibold">{t("Hrs/day")}</th>
+                    <th className="pb-2 font-semibold">{t("Hours")}</th>
+                    <th className="pb-2 font-semibold">{t("Rate")}</th>
+                    <th className="pb-2 text-right font-semibold">{t("Line")}</th>
                     <th className="no-print w-10 pb-2" />
                   </tr>
                 </thead>
@@ -409,23 +443,31 @@ export function Estimator() {
                             setLabor((rows) => rows.map((r, idx) => (idx === i ? { ...r, role: e.target.value } : r)))
                           }
                           className="w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 hover:border-neutral-200 focus:border-neutral-900 focus:outline-none"
-                          placeholder="Role"
+                          placeholder={t("Role")}
                         />
                       </td>
-                      <td className="py-1.5 pr-2">
-                        <input
-                          type="number"
-                          min={0}
-                          step="any"
-                          value={row.hours}
-                          onChange={(e) =>
-                            setLabor((rows) =>
-                              rows.map((r, idx) => (idx === i ? { ...r, hours: parseNumber(e.target.value) } : r)),
-                            )
-                          }
-                          className="w-24 rounded-lg border border-transparent bg-transparent px-2 py-1.5 hover:border-neutral-200 focus:border-neutral-900 focus:outline-none"
-                        />
-                      </td>
+                      {(["crew", "days", "hoursPerDay"] as const).map((key) => (
+                        <td key={key} className="py-1.5 pr-1">
+                          <input
+                            type="number"
+                            min={0}
+                            step="any"
+                            aria-label={t(key === "crew" ? "Crew" : key === "days" ? "Days" : "Hrs/day")}
+                            value={crewFields(row)[key]}
+                            onChange={(e) =>
+                              setLabor((rows) =>
+                                rows.map((r, idx) => {
+                                  if (idx !== i) return r;
+                                  const f = { ...crewFields(r), [key]: parseNumber(e.target.value) };
+                                  return { ...r, ...f, hours: crewHours(f.crew, f.days, f.hoursPerDay) };
+                                }),
+                              )
+                            }
+                            className="w-16 rounded-lg border border-transparent bg-transparent px-2 py-1.5 hover:border-neutral-200 focus:border-neutral-900 focus:outline-none"
+                          />
+                        </td>
+                      ))}
+                      <td className="py-1.5 pr-2 tabular-nums text-neutral-600">{row.hours.toLocaleString(market.locale)}</td>
                       <td className="py-1.5 pr-2">
                         <input
                           type="number"
@@ -463,7 +505,7 @@ export function Estimator() {
           <section className="no-print grid gap-3 rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-sm sm:grid-cols-2 sm:p-5">
             <label className="text-sm">
               <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                Contingency % of direct
+                {t("Contingency % of direct")}
               </span>
               <input
                 type="number"
@@ -489,7 +531,7 @@ export function Estimator() {
             </label>
             <label className="text-sm">
               <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                Markup % of cost-to-complete
+                {t("Markup % of cost-to-complete")}
               </span>
               <input
                 type="number"
@@ -504,22 +546,22 @@ export function Estimator() {
         </div>
 
         <aside className="print-break h-fit rounded-2xl border border-neutral-200/80 bg-white p-5 shadow-sm lg:sticky lg:top-4">
-          <h2 className="text-sm font-bold">Bid breakdown</h2>
-          <p className="mt-1 text-[11px] text-neutral-400">Plain arithmetic. Not a model.</p>
+          <h2 className="text-sm font-bold">{t("Bid breakdown")}</h2>
+          <p className="mt-1 text-[11px] text-neutral-400">{t("Plain arithmetic. Not a model.")}</p>
           <dl className="mt-4 space-y-2 text-sm">
-            <Row label="Materials" value={$(totals.materials)} />
-            <Row label="Labor" value={$(totals.labor)} />
-            <Row className="no-print" label="Contingency" value={$(totals.contingency)} hint={`${pct(contingencyPct)} of direct`} />
-            <Row className="no-print" label="Markup" value={$(totals.markup)} hint={`${pct(markupPct)} of cost`} />
+            <Row label={t("Materials")} value={$(totals.materials)} />
+            <Row label={t("Labor")} value={$(totals.labor)} />
+            <Row className="no-print" label={t("Contingency")} value={$(totals.contingency)} hint={`${pct(contingencyPct)} ${market.lang === "es" ? "del directo" : "of direct"}`} />
+            <Row className="no-print" label={t("Markup")} value={$(totals.markup)} hint={`${pct(markupPct)} ${market.lang === "es" ? "del costo" : "of cost"}`} />
             <div className="border-t border-neutral-200 pt-2">
-              <Row label={`Bid total (ex ${market.taxName})`} value={$(totals.bidTotal)} />
+              <Row label={market.lang === "es" ? `Total sin ${market.taxName}` : `Bid total (ex ${market.taxName})`} value={$(totals.bidTotal)} />
             </div>
-            <Row label={market.taxName} value={$(totals.gst)} hint={`${pct(gstPct)} of bid`} />
+            <Row label={market.taxName} value={$(totals.gst)} hint={`${pct(gstPct)} ${market.lang === "es" ? "del total" : "of bid"}`} />
             <div className="border-t border-neutral-200 pt-2">
-              <Row label={`Total inc ${market.taxName}`} value={$(totals.totalIncGst)} strong />
+              <Row label={market.lang === "es" ? `Total con ${market.taxName}` : `Total inc ${market.taxName}`} value={$(totals.totalIncGst)} strong />
             </div>
-            <Row className="no-print" label="Profit" value={$(totals.profit)} />
-            <Row className="no-print" label="Margin" value={pct(totals.marginPct)} hint="profit ÷ bid" />
+            <Row className="no-print" label={t("Profit")} value={$(totals.profit)} />
+            <Row className="no-print" label={t("Margin")} value={pct(totals.marginPct)} hint={t("profit ÷ bid")} />
           </dl>
           <MarginGuard
             marginPct={totals.marginPct}
@@ -541,16 +583,24 @@ export function Estimator() {
         <span className="no-print">
           {" · "}
           <a href="./bidbench.html" className="underline-offset-2 hover:underline">
-            Classic BidBench
+            {t("Classic BidBench")}
           </a>
         </span>
       </footer>
     </div>
+    </TContext.Provider>
   );
 }
 
 const fieldClass =
   "w-full rounded-lg border border-transparent bg-transparent px-2 py-1.5 hover:border-neutral-200 focus:border-neutral-900 focus:outline-none";
+
+/** Crew view of a labor line. Lines read from a brief only have hours: treat them as 1 person × 1 day × hours. */
+function crewFields(l: LaborLine) {
+  if (l.crew !== undefined && l.days !== undefined && l.hoursPerDay !== undefined)
+    return { crew: l.crew, days: l.days, hoursPerDay: l.hoursPerDay };
+  return { crew: 1, days: 1, hoursPerDay: l.hours };
+}
 
 function QtyRow({
   row,
@@ -563,17 +613,18 @@ function QtyRow({
   onRemove: () => void;
   formatMoney: (n: number) => string;
 }) {
+  const t = useT();
   return (
     <div className="grid grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(4.5rem,0.5fr))_minmax(5rem,0.6fr)_auto] items-center gap-1 rounded-xl border border-neutral-100 px-2 py-1 text-sm">
       <input
         value={row.item}
         onChange={(e) => onChange({ ...row, item: e.target.value })}
         className={fieldClass}
-        placeholder="Item"
+        placeholder={t("Item")}
         aria-label="Material item"
       />
       <label className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">Qty</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t("Qty")}</span>
         <input
           type="number"
           min={0}
@@ -584,7 +635,7 @@ function QtyRow({
         />
       </label>
       <label className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">Unit</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t("Unit")}</span>
         <input
           value={row.unit}
           onChange={(e) => onChange({ ...row, unit: e.target.value })}
@@ -592,7 +643,7 @@ function QtyRow({
         />
       </label>
       <label className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">Unit cost</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t("Unit cost")}</span>
         <input
           type="number"
           min={0}
@@ -603,7 +654,7 @@ function QtyRow({
         />
       </label>
       <div className="text-right">
-        <div className="text-[10px] uppercase tracking-wide text-neutral-400">Line</div>
+        <div className="text-[10px] uppercase tracking-wide text-neutral-400">{t("Line")}</div>
         <div className="font-medium tabular-nums">{formatMoney(materialTotal(row))}</div>
       </div>
       <button
@@ -635,20 +686,21 @@ function AreaPricedRow({
   const labels = labelsForAreaUnit(unit, currency);
   const area = lineArea(row);
   const price = linePricePerArea(row);
+  const t = useT();
   return (
     <div className="grid grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(4.5rem,0.45fr))_minmax(5.5rem,0.55fr)_minmax(5.5rem,0.6fr)_auto] items-center gap-1 rounded-xl border border-amber-200/80 bg-amber-50/40 px-2 py-1 text-sm">
       <label className="flex min-w-0 flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-amber-800/70">{labels.item}</span>
+        <span className="text-[10px] uppercase tracking-wide text-amber-800/70">{t(labels.item)}</span>
         <input
           value={row.item}
           onChange={(e) => onChange({ ...row, item: e.target.value })}
           className={fieldClass}
           placeholder={unit === "m" ? "Re-roof / deck" : "Room / flooring"}
-          aria-label={labels.item}
+          aria-label={t(labels.item)}
         />
       </label>
       <label className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{labels.length}</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t(labels.length)}</span>
         <input
           type="number"
           min={0}
@@ -659,7 +711,7 @@ function AreaPricedRow({
         />
       </label>
       <label className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{labels.width}</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t(labels.width)}</span>
         <input
           type="number"
           min={0}
@@ -670,13 +722,13 @@ function AreaPricedRow({
         />
       </label>
       <div className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{labels.area}</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t(labels.area)}</span>
         <span className="px-2 py-1.5 tabular-nums text-neutral-800">
-          {area.toLocaleString()} {labels.areaSuffix}
+          {area.toLocaleString()} {t(labels.areaSuffix)}
         </span>
       </div>
       <label className="flex flex-col">
-        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{labels.price}</span>
+        <span className="text-[10px] uppercase tracking-wide text-neutral-400">{t(labels.price)}</span>
         <input
           type="number"
           min={0}
@@ -690,7 +742,7 @@ function AreaPricedRow({
         />
       </label>
       <div className="text-right">
-        <div className="text-[10px] uppercase tracking-wide text-neutral-400">{labels.amount}</div>
+        <div className="text-[10px] uppercase tracking-wide text-neutral-400">{t(labels.amount)}</div>
         <div className="font-medium tabular-nums">{formatMoney(materialTotal(row))}</div>
       </div>
       <button
@@ -739,6 +791,8 @@ function MarginGuard(p: {
   kept: number;
   onFix: () => void;
 }) {
+  const t = useT();
+  const es = t("Margin") !== "Margin";
   if (!p.hasBid) return null;
   const thin = p.marginPct < p.target;
   const underwater = p.kept < 0;
@@ -748,29 +802,29 @@ function MarginGuard(p: {
         role="alert"
         className={`rounded-xl px-3 py-2 ${thin ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800"}`}
       >
-        <div className="font-bold">{thin ? "Thin margin" : "Margin at or above floor"}</div>
+        <div className="font-bold">{thin ? t("Thin margin") : t("Margin at or above floor")}</div>
         <div className="text-xs">
-          {pct(p.marginPct)} vs your {pct(p.target)} floor.
-          {thin ? " This bid goes out below the margin you set." : ""}
+          {es ? `${pct(p.marginPct)} contra su mínimo de ${pct(p.target)}.` : `${pct(p.marginPct)} vs your ${pct(p.target)} floor.`}
+          {thin ? (es ? " Esta cotización sale abajo del margen que fijó." : " This bid goes out below the margin you set.") : ""}
         </div>
         {thin && (
           <button type="button" onClick={p.onFix} className="mt-2 rounded-lg bg-red-700 px-2.5 py-1 text-xs font-bold text-white">
-            Raise markup to hit {pct(p.target)}
+            {es ? `Subir utilidad para llegar a ${pct(p.target)}` : `Raise markup to hit ${pct(p.target)}`}
           </button>
         )}
       </div>
       <div className={`rounded-xl px-3 py-2 text-xs ${underwater ? "bg-red-50 text-red-800" : "bg-neutral-50 text-neutral-700"}`}>
-        If cost runs <b>{p.overrun}%</b> over at this price, you keep <b>{pct(p.kept)}</b>
-        {underwater ? " — you lose money." : "."}
-        <div className="mt-1 text-[10px] text-neutral-400">Contingency is a cushion, not a guarantee. This shows what overruns do to the price you send.</div>
+        {es ? "Si el costo sale " : "If cost runs "}<b>{p.overrun}%</b>{es ? " arriba con este precio, le queda " : " over at this price, you keep "}<b>{pct(p.kept)}</b>
+        {underwater ? (es ? ": pierde dinero." : " — you lose money.") : "."}
+        <div className="mt-1 text-[10px] text-neutral-400">{t("Contingency is a cushion, not a guarantee. This shows what overruns do to the price you send.")}</div>
       </div>
       <div className="grid grid-cols-2 gap-2">
         <label className="text-[10px] uppercase tracking-wide text-neutral-400">
-          Margin floor %
+          {t("Margin floor %")}
           <input type="number" min={0} step="0.5" value={p.target} onChange={(e) => p.setTarget(parseNumber(e.target.value))} className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1 text-sm text-neutral-900" />
         </label>
         <label className="text-[10px] uppercase tracking-wide text-neutral-400">
-          Overrun test %
+          {t("Overrun test %")}
           <input type="number" min={0} step="1" value={p.overrun} onChange={(e) => p.setOverrun(parseNumber(e.target.value))} className="mt-1 w-full rounded-lg border border-neutral-200 px-2 py-1 text-sm text-neutral-900" />
         </label>
       </div>

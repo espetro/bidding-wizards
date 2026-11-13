@@ -70,7 +70,7 @@ export function toQuickBooksIif(input: EstimateInput, customer: string, date = n
   return lines.join("\r\n") + "\r\n";
 }
 
-export function download(name: string, body: string, type = "text/plain") {
+export function download(name: string, body: string | Uint8Array<ArrayBuffer>, type = "text/plain") {
   const url = URL.createObjectURL(new Blob([body], { type }));
   const a = Object.assign(document.createElement("a"), { href: url, download: name });
   a.click();
